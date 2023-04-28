@@ -56,36 +56,33 @@ uint64_t Trial_Division(const uint64_t Nmax, uint64_t vPrimes[], void*, void*)
     return numPrimes;
 }
 
-uint64_t Singleton_optimized311(uint64_t Nmax, uint64_t IP[], uint64_t IQ[], int32_t JQ[])
+uint64_t Singleton_optimized311(uint64_t Nmax, 
+                                uint64_t IP[], uint64_t IQ[], int32_t JQ[])
 {
-    uint64_t Nsqr = (uint64_t)ceil(sqrt(Nmax));
-
-    IP[0] = 2; IP[1] = 3; IP[2] = 5; IP[3] = 7;
     uint64_t numPrimes = 4;             // accounting for 2, 3, 5, 7
+    IP[0] = 2; IP[1] = 3; IP[2] = 5; IP[3] = 7;
     AddPrime(2); AddPrime(3); AddPrime(5); AddPrime(7);
 
-    uint64_t iqi, n, step, nq, j, ij;
+    uint64_t iqi, n, step, j, ij;
     int32_t jqi;
     iqi = 5 * 5; jqi = -2 * 5;          // initial values for prime number 5
     IQ[1] = 7 * 7; JQ[1] = 2 * 7;       // initial values for prime number 7
-    nq = 1;                             // number of elements in the heap
+    uint64_t nq = 1;                    // number of elements in the heap
 
+    uint64_t Nsqr = (uint64_t)ceil(sqrt(Nmax));
     for (n = 11, step = 2; n <= Nmax; n += step, step = 6 - step)
     {
         if (n == iqi)
             do
-            {
-                //advance iqi
+            {   //advance iqi
                 iqi = (jqi > 0) ? (iqi + jqi + jqi) : (iqi - jqi);
                 jqi = -jqi;
                 if (iqi > IQ[1])
-                {
-                    //change iqi if necessary
+                {   //change iqi if necessary
                     std::swap(IQ[1], iqi); std::swap(JQ[1], jqi);
                     // push down the value if necessary
                     for (j = 2, ij = 1; (j <= nq); ij = j, j *= 2)
-                    {
-                        //j is the first child of ij; slide right if required
+                    {   //j is the first child of ij; slide right if required
                         if ((j < nq) && (IQ[j] > IQ[j + 1])) j++;
                         if (IQ[j] < IQ[ij])
                         {
@@ -97,7 +94,7 @@ uint64_t Singleton_optimized311(uint64_t Nmax, uint64_t IP[], uint64_t IQ[], int
                 }
             } while (n == iqi);
         else
-        {
+        {   //found a prime
             IP[numPrimes++] = n; AddPrime(n);
 
             if (n <= Nsqr) //if a root prime
@@ -107,19 +104,16 @@ uint64_t Singleton_optimized311(uint64_t Nmax, uint64_t IP[], uint64_t IQ[], int
                 JQ[nq] = (uint32_t)(((n - (n / 3) * 3) == 1) ? 2 * n : -2 * n);
                 // push up the value if necessary
                 for (j = nq, ij = j / 2; (j > 1) && (IQ[j] < IQ[ij]); j = ij, ij /= 2)
-                {
-                    //ij is the father of j
+                {   //ij is the father of j
                     std::swap(IQ[j], IQ[ij]); std::swap(JQ[j], JQ[ij]);
                 }
                 if (iqi > IQ[1])
-                {
-                    //change also iqi if necessary
+                {   //change iqi if necessary
                     std::swap(IQ[1], iqi); std::swap(JQ[1], jqi);
                 }
             }
         }
     };
-
     return numPrimes;
 }
 
@@ -187,15 +181,14 @@ uint64_t GalePratt(uint64_t Nmax, uint8_t sv[], void*, void*)
         return (sv[idx] & BIT_MASK[bit]);
     };
 
-    std::vector<uint64_t> s = { 1 };
+    std::vector<uint64_t> ts, s = { 1 };
 
     uint64_t i, k, m;
     for (i = 0; i <= Nmax; i++) sv[i] = 0;     // assume all primes
-
+    //sieve
     for (i = 3; i <= Nmax / 2; i += 2)
         if (!GetBit(i))
         {
-            std::vector<uint64_t> ts;
             for (auto j : s)
             {
                 k = j;
@@ -210,15 +203,13 @@ uint64_t GalePratt(uint64_t Nmax, uint8_t sv[], void*, void*)
                 }
             }
             s = ts;
+            ts.resize(0);
         }
-
+    //count
     uint64_t numPrimes = 1; AddPrime(2);
     for (i = 3; i <= Nmax; i += 2)
         if (!GetBit(i))
-        {
-            numPrimes++;
-            AddPrime(i);
-        }
+        { numPrimes++; AddPrime(i); }
 
     return numPrimes;
 }
@@ -392,10 +383,9 @@ uint64_t Atkin(const uint64_t limit, bool sieve[], void*, void*)
     return numprimes;
 }
 
-constexpr uint64_t szM = 500'000;
-bool vM[szM+1];
-
-uint64_t Sieve357(const uint64_t Nmax, uint64_t IP[], uint64_t IQ[], int32_t JQ[], bool initialize = false)
+constexpr uint64_t szM = 500'000; bool vM[szM+1];
+uint64_t Sieve357(const uint64_t Nmax, 
+                  uint64_t IP[], uint64_t IQ[], int32_t JQ[], bool initialize = false)
 {
     uint64_t numPrimes = 0;     //for this call
     for (int i = 0; i < szM; i++) vM[i] = true;
@@ -408,14 +398,14 @@ uint64_t Sieve357(const uint64_t Nmax, uint64_t IP[], uint64_t IQ[], int32_t JQ[
         vM[1] = false;
         JQ[0] = 3;  IQ[0] = 9;
         iq = 0; stepq = 2; nq = 5;
-        nstart = 0;
-        nend = szM;
+        nstart = 0; nend = szM;
         numPrimes = 1; AddPrime(2); // account for 2
     }
 
-    uint64_t nsqrt = (uint64_t)ceil(sqrt(nstart + szM));
+    uint64_t n, nsqrt = (uint64_t)ceil(sqrt(nstart + szM));
+    //generate rest of root primes for this iteration
     for (; nq <= nsqrt; nq += stepq, stepq = 6 - stepq)
-    {   //generate rest of root primes for this iteration
+    {   
         bool isprime = true;
         for (int i = 2; i <= iq; i++)
         {   //trial-division
@@ -432,17 +422,12 @@ uint64_t Sieve357(const uint64_t Nmax, uint64_t IP[], uint64_t IQ[], int32_t JQ[
             IQ[iq] = ((uint64_t)nq) * nq;
         }
     }
-
     //strike out all composites
     for (int i = 0; i <= iq; i++)
     {
-        uint64_t n = IQ[i];
         uint32_t stp = 2 * JQ[i];
-        while (n < nend)
-        {
+        for (n = IQ[i]; n < nend; n += stp)
             vM[n - nstart] = false;
-            n += stp;
-        }
         IQ[i] = n;
     }
     //move primes in IP
@@ -452,9 +437,8 @@ uint64_t Sieve357(const uint64_t Nmax, uint64_t IP[], uint64_t IQ[], int32_t JQ[
         else
         if (vM[i])
             AddPrime(IP[numPrimes++] = nstart + i);
-
-    nstart = nend;
-    nend += szM;
+    //prepare for next call
+    nstart = nend; nend += szM;
 
     return numPrimes;
 }
