@@ -383,7 +383,7 @@ uint64_t Atkin(const uint64_t limit, bool sieve[], void*, void*)
     return numprimes;
 }
 
-constexpr uint64_t szM = 500'000; bool vM[szM+1];
+constexpr uint64_t szM = 450'000; bool vM[szM+1];
 uint64_t Sieve357(const uint64_t Nmax, 
                   uint64_t IP[], uint64_t IQ[], int32_t JQ[], bool initialize = false)
 {
